@@ -4,7 +4,10 @@ name: Windows/MinGW-W64 Release
 on:
   push:
     tags:
-      - v*
+      - htslib-v*
+
+env:
+  HTSLIB_REF: 1.22
 
 jobs:
   build:
@@ -14,7 +17,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: samtools/htslib
-        ref: master
+        ref: ${{env.HTSLIB_REF}}
         submodules: true
     - name: Set up MSYS2 MinGW-W64
       uses: msys2/setup-msys2@v2
@@ -74,7 +77,7 @@ jobs:
         export PATH="/mingw64/bin:$PATH:/c/Program Files/Git/bin"
         export MSYSTEM=MINGW64
         pushd dist-windows
-        7z a -mx=9 ../htslib-win-$(git rev-parse --short HEAD)-$(git rev-parse --short $GITHUB_SHA).zip .
+        7z a -mx=9 "../htslib-win-${{env.HTSLIB_REF}}-$(git rev-parse --short HEAD)-$(git rev-parse --short $GITHUB_SHA).zip" .
         popd
         tar czvf artifact.tgz *
     - name: Upload Artifacts
