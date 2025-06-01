@@ -1,7 +1,10 @@
 # adapted from https://github.com/samtools/htslib/blob/master/.github/workflows/windows-build.yml
 
 name: Windows/MinGW-W64 Release
-on: [push]
+on:
+  push:
+    tags:
+      - v*
 
 jobs:
   build:
@@ -81,6 +84,8 @@ jobs:
         path: artifact.tgz
     - name: Release
       uses: softprops/action-gh-release@v2
-      if: github.ref_type == 'tag'
       with:
         files: htslib-win-*.zip
+
+permissions:
+  contents: write
