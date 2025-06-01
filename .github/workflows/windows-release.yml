@@ -41,7 +41,7 @@ jobs:
         export MSYSTEM=MINGW64
         echo -e "https://github.com/likuilin/htslib-win-build\n" \
           "workflow commit: $GITHUB_SHA\n" \
-          "htslib commit: $(git rev-parse --abbrev-ref HEAD) $(git rev-parse HEAD)" > release.txt
+          "htslib commit: ${{env.HTSLIB_REF}} $(git rev-parse HEAD)" > release.txt
         autoreconf -i
         ./configure --enable-werror --with-libdeflate
         make cc-version
