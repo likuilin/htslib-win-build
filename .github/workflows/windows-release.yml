@@ -1,0 +1,86 @@
+# adapted from https://github.com/samtools/htslib/blob/master/.github/workflows/windows-build.yml
+
+name: Windows/MinGW-W64 Release
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        repository: samtools/htslib
+        ref: master
+        submodules: true
+    - name: Set up MSYS2 MinGW-W64
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: mingw64
+        update: false
+        install: >-
+          mingw-w64-x86_64-7zip
+          mingw-w64-x86_64-autotools
+          mingw-w64-x86_64-bzip2
+          mingw-w64-x86_64-curl
+          mingw-w64-x86_64-libdeflate
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-tools-git
+          mingw-w64-x86_64-xz
+          mingw-w64-x86_64-zlib
+    - name: Compile htslib
+      shell: msys2 {0}
+      run: |
+        export PATH="/mingw64/bin:$PATH:/c/Program Files/Git/bin"
+        export MSYSTEM=MINGW64
+        echo -e "https://github.com/likuilin/htslib-win-build\n"\
+          "workflow commit: $GITHUB_HEAD_REF $GITHUB_SHA\n"\
+          "htslib commit: $(git rev-parse --abbrev-ref HEAD) $(git rev-parse HEAD)" > release.txt
+        autoreconf -i
+        ./configure --enable-werror --with-libdeflate
+        make cc-version
+        make -j6 prefix=dist-windows install
+        cp `ldd dist-windows/bin/*.exe | awk '/mingw64/ {print $3}' | sort -u` dist-windows/bin
+        cp release.txt dist-windows
+        mkdir -p dist-windows/share/licenses/htslib
+        cp -r /mingw64/share/licenses/mingw-w64-libraries \
+              /mingw64/share/licenses/brotli \
+              /mingw64/share/licenses/bzip2 \
+              /mingw64/share/licenses/gcc-libs \
+              /mingw64/share/licenses/libdeflate \
+              /mingw64/share/licenses/libpsl \
+              /mingw64/share/licenses/libtre \
+              /mingw64/share/licenses/libwinpthread \
+              /mingw64/share/licenses/openssl \
+              /mingw64/share/licenses/xz \
+              /mingw64/share/licenses/zlib \
+              /mingw64/share/licenses/zstd \
+              dist-windows/share/licenses/
+        cp -r /usr/share/licenses/curl \
+              dist-windows/share/licenses/
+        cp LICENSE dist-windows/share/licenses/htslib/
+#    - name: Check Htslib
+#      shell: msys2 {0}
+#      run: |
+#        export PATH="/mingw64/bin:$PATH:/c/Program Files/Git/bin"
+#        export MSYSTEM=MINGW64
+#        make test-shlib-exports && make check
+    - name: Collect Files
+      shell: msys2 {0}
+      run: |
+        export PATH="/mingw64/bin:$PATH:/c/Program Files/Git/bin"
+        export MSYSTEM=MINGW64
+        pushd dist-windows
+        7z a -mx=9 ../htslib-win-$(git rev-parse --short HEAD)-$(git rev-parse --short $GITHUB_SHA).zip .
+        popd
+        tar czvf artifact.tgz *
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: artifact
+        path: artifact.tgz
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
+      with:
+        files: htslib-win-*.zip
