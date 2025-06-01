@@ -7,7 +7,7 @@ on:
       - htslib-v*
 
 env:
-  HTSLIB_REF: master
+  HTSLIB_REF: 1.22
 
 jobs:
   build:
