@@ -36,8 +36,8 @@ jobs:
       run: |
         export PATH="/mingw64/bin:$PATH:/c/Program Files/Git/bin"
         export MSYSTEM=MINGW64
-        echo -e "https://github.com/likuilin/htslib-win-build\n"\
-          "workflow commit: $GITHUB_HEAD_REF $GITHUB_SHA\n"\
+        echo -e "https://github.com/likuilin/htslib-win-build\n" \
+          "workflow commit: $GITHUB_SHA\n" \
           "htslib commit: $(git rev-parse --abbrev-ref HEAD) $(git rev-parse HEAD)" > release.txt
         autoreconf -i
         ./configure --enable-werror --with-libdeflate
