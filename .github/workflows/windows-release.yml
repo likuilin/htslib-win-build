@@ -49,19 +49,8 @@ jobs:
         cp `ldd dist-windows/bin/*.exe | awk '/mingw64/ {print $3}' | sort -u` dist-windows/bin
         cp release.txt dist-windows
         mkdir -p dist-windows/share/licenses/htslib
-        cp -r /mingw64/share/licenses/mingw-w64-libraries \
-              /mingw64/share/licenses/brotli \
-              /mingw64/share/licenses/bzip2 \
-              /mingw64/share/licenses/gcc-libs \
-              /mingw64/share/licenses/libdeflate \
-              /mingw64/share/licenses/libpsl \
-              /mingw64/share/licenses/libtre \
-              /mingw64/share/licenses/libwinpthread \
-              /mingw64/share/licenses/openssl \
-              /mingw64/share/licenses/xz \
-              /mingw64/share/licenses/zlib \
-              /mingw64/share/licenses/zstd \
-              dist-windows/share/licenses/
+        cp -rT /mingw64/share/licenses \
+              dist-windows/share/licenses
         cp -r /usr/share/licenses/curl \
               dist-windows/share/licenses/
         cp LICENSE dist-windows/share/licenses/htslib/
